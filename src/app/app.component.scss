@@ -1,0 +1,57 @@
+.tic-tac-toe {
+  h4 {
+    color: #3f51b5;
+    font-size: 25px;
+  }
+  .row {
+    min-height: 100%;
+    .col {
+      cursor: pointer;
+      height: 100px;
+      width: 100px;
+      border: 1px solid #6e6ebe;
+    }
+  }
+
+  .row0 {
+    .col0 {
+      border-left: 0;
+      border-top: 0;
+    }
+    .col1 {
+      border-top: 0;
+    }
+    .col2 {
+      border-top: 0;
+      border-right: 0;
+    }
+  }
+  .row1 {
+    .col0 {
+      border-left: 0;
+    }
+    .col2 {
+      border-right: 0;
+    }
+  }
+  .row2 {
+    .col0 {
+      border-left: 0;
+      border-bottom: 0;
+    }
+    .col1 {
+      border-bottom: 0;
+    }
+    .col2 {
+      border-bottom: 0;
+      border-right: 0;
+    }
+  }
+
+  span {
+    text-align: center;
+    font-size: 25px;
+    font-family: cursive;
+    transform: scale(1.5);
+  }
+}

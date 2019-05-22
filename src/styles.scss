@@ -1,7 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
 @import "app/app.component.scss";
 
 body {
   height: 100%;
+}
+
+.mat-raised-button {
+  background-color: #3f51b5;
+  color: white;
 }

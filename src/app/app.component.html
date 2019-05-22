@@ -1,12 +1,18 @@
 <div class="tic-tac-toe" @fade-in>
   <h4 fxLayoutAlign="center">Tic Tac Toe</h4>
-    <div class="row row{{i}}" fxLayout="row wrap" fxLayoutAlign="center" *ngFor="let row of blocks; let i = index;">
+  <div class="row row{{i}} " fxLayout="row wrap" fxLayoutAlign="center" *ngFor="let row of blocks; let i = index;">
         <div class="col col{{j}}" fxLayout="column" fxFlex="10"
              fxFlex.xs="30"
              *ngFor="let col of row;  let j = index;" (click)="select(i, j)" fxLayoutAlign="center">
-          <span class="cross" *ngIf="col === 'x'" @stretch>X</span>
-          <span class="circle" *ngIf="col === 'o'" @stretch>O</span>
+          <!--<svg style='width: 100%; height: 100%;' *ngIf="done && visible[i][j]">
+            <line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2"
+                  style="stroke:rgb(0,137,123);stroke-width:4"></line>
+          </svg>-->
+          <span [ngClass]="{ 'cross': col === 'x', 'circle': col === 'o' }">{{col}}</span>
         </div>
     </div>
 </div>
-
+<div fxLayout="row" fxLayoutAlign="center" fxLayoutGap="2%" class="actions">
+  <button mat-raised-button (click)="newGame()">NEW GAME</button>
+  <button mat-raised-button (click)="reset()">RESET</button>
+</div>

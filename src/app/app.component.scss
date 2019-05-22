@@ -59,5 +59,16 @@
     font-size: 25px;
     font-family: cursive;
     transform: scale(1.5);
+    position: absolute;
+    margin-left: 50px;
+    text-transform: uppercase;
   }
+
+  .cross {
+    color: #6ebea8;
+  }
+}
+
+.actions {
+  margin-top: 10px;
 }

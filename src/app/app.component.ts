@@ -19,7 +19,6 @@ export class AppComponent implements OnInit{
 
   blocks: any;
   count: number = 0;
-  current: any;
   dataBlocks: any;
   done: any;
   isOpponent = false;
@@ -85,14 +84,33 @@ export class AppComponent implements OnInit{
       }
     }
 
-    if (blocks[0][0] == blocks[1][1] && blocks[1][1] == blocks[2][2] && blocks[2][2] != '') {
-
-      return blocks[0][0];
+    winnerFound = true;
+    for (let i = 0; i < this.length-1; i++) {
+        if (blocks[i][i] != blocks[i+1][i+1]) {
+          winnerFound = false;
+          break;
+        }
     }
 
-    if (blocks[0][2] == blocks[1][1] && blocks[1][1] == blocks[2][0] && blocks[2][0] != '') {
+    if (winnerFound && blocks[0][0] != '') {
 
-        return blocks[0][2];
+      return blocks[0][0];
+    } else {
+      winnerFound = true;
+    }
+
+    let i = 0;
+    for (let j = this.length-1; j > 0; j--) {
+        if (blocks[i][j] != blocks[i+1][j-1]) {
+          winnerFound = false;
+          break;
+        }
+        ++i;
+    }
+
+    if (winnerFound && blocks[0][this.length-1] != '') {
+
+      return blocks[0][this.length-1];
     }
 
     return this.count < 9 ? this.NONE : this.TIE;
@@ -197,7 +215,7 @@ export class AppComponent implements OnInit{
   }
 
   getBestMove(blocks): any {
-    let bestMove = null;
+    let bestMove;
     if (this.level != 'easy') {
       bestMove = this.minimax(blocks,true, 1);
     } else {

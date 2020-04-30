@@ -1,5 +1,6 @@
-import {Component} from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-level-selector',
@@ -8,8 +9,12 @@ import {MatDialogRef} from '@angular/material';
 })
 export class LevelSelectorComponent {
 
-  constructor(private dialogRef: MatDialogRef<LevelSelectorComponent>) {
+  winner: string = '';
 
+  constructor(private dialogRef: MatDialogRef<LevelSelectorComponent>,
+              @Inject(MAT_DIALOG_DATA) private data: any) {
+
+      this.winner = data.winner;
   }
 
   close(level): void {

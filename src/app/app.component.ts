@@ -17,122 +17,225 @@ import {LevelSelectorComponent} from './level-selector/level-selector.component'
 })
 export class AppComponent implements OnInit{
 
-  activeBox: any;
-  activeBlocks: any = [];
   blocks: any;
   count: number = 0;
   current: any;
   dataBlocks: any;
   done: any;
-  isOpponentPlayed = true;
+  isOpponent = false;
   visible: any;
   line: any  = {};
   level: string = '';
   length: number = 3;
   maxLength: number;
-  winIndices: any;
   winLines: any = {
      diagonal:   { x1: '0', x2: 'this.length50', y1: '0', y2: '280' },
      horizontal: { x1: '0', x2: '100%', y1: '50', y2: '50' },
      vertical:   { x1: '60', x2: '60', y1: '0', y2: '100%' },
      revDiagonal:{ x1: '0', x2: '100%', y1: '100%', y2: '0' }
   };
-  
+  NONE: string = 'NONE';
+  TIE: string = 'Draw';
+  human: string = 'x';
+  ai: string = 'o';
+
   constructor(private dialog: MatDialog) {
     this.reset();
   }
 
-  checkValid(index, opponent): boolean {
-    return index > -1 &&
-    !this.dataBlocks[opponent].includes(index) &&
-    this.dataBlocks[this.current].includes(index)
-  }
+  findWinner(blocks: any): string {
 
-  isGameOver(row, col): boolean {
-    let opponent = this.current === 'x' ? 'o' : 'x';
-    let current = (row * this.length) + col;
+    let winnerFound = true;
 
-    let top = ((row + 1) * this.length) + col;
-    let right = (row * this.length) + col + 1;
-    let bottom = ((row - 1) * this.length) + col;
-    let left = (row * this.length) + col - 1;
+    for (let i = 0; i < blocks.length; i++) {
 
-    if (this.checkValid(top, opponent)) {
+        for (let j = 0; j < blocks[0].length-1; j++) {
 
+            if (blocks[i][j] != blocks[i][j+1]) {
+
+              winnerFound = false;
+              break;
+            }
+        }
+
+        if (winnerFound && blocks[i][0] != '') {
+
+          return blocks[i][0];
+        } else {
+          winnerFound = true;
+        }
     }
 
+    for (let i = 0; i < blocks[0].length; i++) {
 
-    return false;
+      for (let j = 0; j < blocks.length-1; j++) {
+
+        if (blocks[j][i] != blocks[j+1][i]) {
+
+          winnerFound = false;
+          break;
+        }
+      }
+
+      if (winnerFound && blocks[0][i] != '') {
+
+        return blocks[0][i];
+      } else {
+        winnerFound = true;
+      }
+    }
+
+    if (blocks[0][0] == blocks[1][1] && blocks[1][1] == blocks[2][2] && blocks[2][2] != '') {
+
+      return blocks[0][0];
+    }
+
+    if (blocks[0][2] == blocks[1][1] && blocks[1][1] == blocks[2][0] && blocks[2][0] != '') {
+
+        return blocks[0][2];
+    }
+
+    return this.count < 9 ? this.NONE : this.TIE;
   }
 
-  newGame(): void {
+  newGame(winner?): void {
     const dialogRef = this.dialog.open(LevelSelectorComponent, {
       width: '250px',
-      disableClose: true
+      disableClose: true,
+      data: { winner: winner ? winner.toUpperCase() : '' }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       this.level = result;
       this.reset();
-      console.log(result);
     });
   }
 
   reset(): void {
-    this.activeBox = {};
-    this.activeBlocks = [];
     this.blocks = Array.from(Array(this.length), () => Array(this.length).fill(''));
-    this.current = 'x';
+    this.human = 'x';
+    this.ai = 'o';
     this.done = false;
-    this.isOpponentPlayed = true;
+    this.isOpponent = false;
     this.visible = Array.from(Array(this.length), () => Array(this.length).fill(false));
     this.line = {};
     this.maxLength = this.length * this.length;
     this.dataBlocks = { x: [], o: [] };
-    for (let i = 0; i < this.maxLength; i++) {
-      this.activeBlocks.push(i);
+    this.count = 0;
+  }
+
+  minimax(blocks, isMaximizing, depth): any {
+    let bestMove = {
+      rate: -Infinity,
+      row: -1,
+      col: -1
+    };
+
+    if (this.count > 4) {
+      let winner = this.findWinner(this.blocks);
+      if (winner == this.ai) {
+        bestMove.rate = 1;
+        return bestMove;
+      } else if (winner != this.NONE) {
+        bestMove.rate = winner == this.TIE ? 0 : -1;
+        return bestMove;
+      }
+    }
+
+    if (isMaximizing) {
+        bestMove.rate = -Infinity;
+        for (let i = 0; i < blocks.length; i++) {
+          for (let j = 0; j < blocks.length; j++) {
+              if (!blocks[i][j]) {
+                blocks[i][j] = this.ai;
+                ++this.count;
+                let move = this.minimax(blocks,false, depth+1);
+                --this.count;
+                blocks[i][j] = '';
+                if (move.rate > bestMove.rate) {
+                  bestMove.rate = move.rate;
+                  bestMove.row = i;
+                  bestMove.col = j;
+                }
+              }
+          }
+        }
+        return bestMove;
+    } else {
+      bestMove.rate = Infinity;
+      for (let i = 0; i < blocks.length; i++) {
+        for (let j = 0; j < blocks.length; j++) {
+          if (!blocks[i][j]) {
+            blocks[i][j] = this.human;
+            ++this.count;
+            let move = this.minimax(blocks, true, depth+1);
+            --this.count;
+            blocks[i][j] = '';
+            if (move.rate < bestMove.rate) {
+              bestMove.rate = move.rate;
+              bestMove.row = i;
+              bestMove.col = j;
+            }
+          }
+        }
+      }
+      return bestMove;
     }
   }
 
   select(row, col): void {
-    if (!this.blocks[row][col] && this.isOpponentPlayed) {
-      if (this.count > 4 && this.isGameOver(row, col)) {
-        alert(this.current);
-        return;
-      }
+    if (!this.blocks[row][col] && !this.isOpponent) {
       this.setBlock(row, col);
-      this.activeBlocks.splice(this.activeBlocks.indexOf((row * this.length) + col), 1);
-      this.isOpponentPlayed = false;
-      this.visible[row][col] = true;
-      if (this.activeBlocks.length > 0) {
-        setTimeout(() => {
-          const nextBlock = this.activeBlocks.splice(Math.floor(Math.random() * (this.activeBlocks.length - 1)), 1)[0];
-          row = Math.floor(nextBlock / this.length);
-          col = nextBlock % this.length;
-          if (this.count > 4 && this.isGameOver(row, col)) {
-            alert(this.current);
-            return;
-          }
-          this.setBlock(row, col);
-          this.isOpponentPlayed = true;
-        }, 500);
-      }
+      this.checkWinner(this.playAi);
     }
   }
 
+  playAi = () => {
+    let bestMove = this.getBestMove(this.blocks);
+    this.setBlock(bestMove.row, bestMove.col);
+    this.checkWinner();
+  }
+
+  getBestMove(blocks): any {
+    let bestMove = null;
+    if (this.level != 'easy') {
+      bestMove = this.minimax(blocks,true, 1);
+    } else {
+      let row = 0, col = 0;
+      while (blocks[row][col]) {
+        row = this.random(blocks.length);
+        col = this.random(blocks.length);
+      }
+      bestMove = { row: row, col: col };
+    }
+    return bestMove;
+  }
+
+  random(n): number {
+    return Math.floor(Math.random() * n);
+  }
+
+  checkWinner(callback?): void {
+    if (this.count > 4) {
+      let winner = this.findWinner(this.blocks);
+      if (winner != this.NONE) {
+        setTimeout(() => {
+          winner = winner != this.TIE ? winner.concat(' Won') : winner;
+          this.newGame(winner);
+        });
+        return;
+      }
+    }
+    callback && callback();
+  }
+
   setBlock(row, col): void {
-    this.blocks[row][col] = this.current;
-    this.current = this.current === 'x' ? 'o' : 'x';
-    this.activeBox = {
-      x: row,
-      y: col
-    };
-    this.dataBlocks[this.current].push((row * this.length) + col);
+    this.blocks[row][col] = this.isOpponent ? this.ai : this.human;
+    this.isOpponent = !this.isOpponent;
     this.count++;
   }
 
   ngOnInit(): void {
     this.newGame();
   }
-
 }

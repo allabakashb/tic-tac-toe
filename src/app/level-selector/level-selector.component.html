@@ -1,4 +1,10 @@
 <div fxLayout="column" fxLayoutGap="10%">
-  <button (click)="close('easy')" mat-raised-button> Easy </button>
-  <button (click)="close('hard')" mat-raised-button> Hard </button>
+  <div fxLayout="row wrap" fxFlex="100" fxLayoutAlign="center" class="blue-font winner" *ngIf="winner">
+    {{ winner }}
+  </div>
+  <div fxLayout="column" fxLayoutGap="10%">
+    <div fxLayout="row" fxFlex="100" fxLayoutAlign="center" class="blue-font" *ngIf="winner">Play Again</div>
+    <button (click)="close('easy')" mat-raised-button> Easy </button>
+    <button (click)="close('hard')" mat-raised-button> Hard </button>
+  </div>
 </div>
